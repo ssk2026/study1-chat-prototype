@@ -107,7 +107,8 @@
     .participant-card b { display: block; font-size: 12px; }
     .participant-card span { color: var(--muted); font-size: 11px; }
 
-    .main { min-width: 0; display: flex; flex-direction: column; position: relative; }
+    .main { min-width: 0; display: flex; flex-direction: column; position: relative; transition: margin-right .24s ease; }
+    body.rank-open .main { margin-right: 390px; }
     .topbar {
       height: 61px;
       flex: none;
@@ -191,6 +192,67 @@
     .send svg { width: 18px; height: 18px; }
     .footnote { margin-top: 8px; text-align: center; color: #8b9490; font-size: 10px; }
 
+    .rank-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 15;
+      width: 390px;
+      display: flex;
+      flex-direction: column;
+      background: #fbfcfb;
+      border-left: 1px solid var(--line);
+      box-shadow: -16px 0 40px rgba(23, 32, 29, .08);
+      transform: translateX(102%);
+      transition: transform .24s ease;
+    }
+    body.rank-open .rank-panel { transform: translateX(0); }
+    .rank-head { min-height: 61px; padding: 11px 13px 10px 17px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.96); }
+    .rank-head strong { display: block; font-size: 14px; }
+    .rank-head span { color: var(--muted); font-size: 11px; }
+    .rank-close { width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--soft); font-size: 20px; cursor: pointer; }
+    .rank-progress { display: grid; grid-template-columns: repeat(3, 1fr); padding: 12px 14px 10px; gap: 6px; border-bottom: 1px solid var(--line); background: white; }
+    .rank-step { display: flex; align-items: center; gap: 6px; min-width: 0; color: #8a938f; font-size: 10px; font-weight: 700; }
+    .rank-step::before { content: attr(data-step); width: 20px; height: 20px; flex: none; display: grid; place-items: center; border-radius: 50%; background: #edf0ee; color: #68736e; }
+    .rank-step.active { color: var(--brand-dark); }
+    .rank-step.active::before, .rank-step.done::before { color: white; background: var(--brand); }
+    .rank-step.done { color: #577068; }
+    .rank-content { flex: 1; min-height: 0; overflow-y: auto; padding: 15px 14px 24px; }
+    .rank-intro { margin-bottom: 12px; color: #59655f; font-size: 12px; }
+    .rank-intro b { color: var(--ink); }
+    .rank-list { display: grid; gap: 6px; margin: 0 0 14px; padding: 0; list-style: none; }
+    .rank-item { display: grid; grid-template-columns: 27px 20px minmax(0,1fr) 27px 27px; align-items: center; gap: 5px; min-height: 43px; padding: 5px 6px; border: 1px solid #dfe4e1; border-radius: 11px; background: white; box-shadow: 0 2px 7px rgba(25,42,35,.03); cursor: grab; user-select: none; }
+    .rank-item:active { cursor: grabbing; }
+    .rank-item.dragging { opacity: .45; border-color: var(--brand); }
+    .rank-item.drag-over { border-color: var(--brand); background: var(--brand-soft); }
+    .rank-number { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 8px; color: var(--brand-dark); background: var(--brand-soft); font-size: 11px; font-weight: 800; }
+    .drag-handle { color: #9ba39f; font-size: 16px; letter-spacing: -3px; }
+    .rank-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 620; }
+    .move-btn { width: 27px; height: 27px; padding: 0; border: 0; border-radius: 7px; color: #67716d; background: var(--soft); cursor: pointer; line-height: 1; }
+    .move-btn:disabled { opacity: .28; cursor: default; }
+    .rank-action { position: sticky; bottom: -24px; padding: 12px 0 2px; background: linear-gradient(180deg, rgba(251,252,251,0), #fbfcfb 24%); }
+    .rank-action .primary:disabled { background: #bdc6c2; cursor: default; }
+    .rank-helper { margin: 8px 2px 0; color: #7c8782; text-align: center; font-size: 10px; }
+    .reveal-card { margin-bottom: 12px; padding: 12px; border: 1px solid #d7e8e1; border-radius: 13px; background: #f2f8f6; }
+    .reveal-card b { display: block; margin-bottom: 3px; color: #174a3b; font-size: 13px; }
+    .reveal-card p { margin: 0; color: #52645d; font-size: 11px; }
+    .compare-head, .compare-row { display: grid; grid-template-columns: 28px minmax(0,1fr) minmax(0,1fr); gap: 7px; align-items: center; }
+    .compare-head { padding: 4px 7px 7px; color: #77827d; font-size: 10px; font-weight: 800; }
+    .compare-row { min-height: 38px; padding: 5px 7px; border-top: 1px solid var(--line); background: white; font-size: 11px; }
+    .compare-row:first-of-type { border-radius: 11px 11px 0 0; }
+    .compare-row:last-of-type { border-radius: 0 0 11px 11px; }
+    .compare-row .n { color: var(--brand); font-weight: 800; }
+    .comparison { margin-bottom: 14px; border: 1px solid var(--line); border-radius: 11px; overflow: hidden; }
+    .panel-stage[hidden] { display: none; }
+    .chat-rank-card { margin: 10px 0 0; overflow: hidden; border: 1px solid #dce6e2; border-radius: 12px; }
+    .chat-rank-card div { display: grid; grid-template-columns: 24px 1fr 1fr; gap: 8px; padding: 7px 9px; border-top: 1px solid #e7ecea; font-size: 11px; }
+    .chat-rank-card div:first-child { border-top: 0; color: #68736e; background: #f7f9f8; font-weight: 700; }
+    .completion-card { padding: 22px 16px; text-align: center; border: 1px solid #d8e9e2; border-radius: 16px; background: #f1f8f5; }
+    .completion-icon { width: 48px; height: 48px; margin: 0 auto 10px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--brand); font-size: 22px; }
+    .completion-card h3 { margin: 0 0 6px; font-size: 15px; }
+    .completion-card p { margin: 0; color: #5c6b65; font-size: 12px; }
+
     .modal-backdrop { position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(15, 24, 21, .38); backdrop-filter: blur(4px); }
     .modal-backdrop.open { display: flex; }
     .modal { width: min(620px, 100%); max-height: min(760px, calc(100vh - 40px)); overflow: auto; background: white; border-radius: 20px; box-shadow: var(--shadow); }
@@ -219,6 +281,11 @@
 
     @media (max-width: 760px) {
       .app { grid-template-columns: 1fr; }
+      body.rank-open .main { margin-right: 0; }
+      .rank-panel { top: auto; left: 0; width: 100%; height: min(82vh, 720px); border: 0; border-top: 1px solid var(--line); border-radius: 22px 22px 0 0; box-shadow: 0 -18px 50px rgba(17,30,25,.18); transform: translateY(105%); }
+      body.rank-open .rank-panel { transform: translateY(0); }
+      body.rank-open::after { content: ""; position: fixed; inset: 0; z-index: 14; background: rgba(15,24,21,.28); }
+      .rank-head { border-radius: 22px 22px 0 0; }
       .sidebar { position: fixed; inset: 0 auto 0 0; width: min(84vw, 300px); z-index: 30; transform: translateX(-102%); transition: .22s ease; box-shadow: var(--shadow); }
       .sidebar.open { transform: translateX(0); }
       .sidebar-scrim { position: fixed; inset: 0; z-index: 29; background: rgba(13, 22, 19, .36); }
@@ -229,7 +296,7 @@
       .conversation-inner { width: min(100% - 24px, 760px); padding-top: 18px; }
       .message { grid-template-columns: 30px minmax(0, 1fr); gap: 10px; }
       .avatar-ai { width: 30px; height: 30px; }
-      .top-actions .pill-button:first-of-type { display: none; }
+      .top-actions .pill-button[data-open="taskModal"] { display: none; }
       .composer-wrap { padding-inline: 10px; }
       .item-grid { grid-template-columns: 1fr; }
     }
@@ -287,6 +354,7 @@
         </div>
         <div class="top-actions">
           <span class="timer" id="timer">00:00</span>
+          <button class="pill-button" id="rankToggle">순위 정하기</button>
           <button class="pill-button" data-open="taskModal">과제 보기</button>
           <button class="pill-button" data-open="dataModal">세션 정보</button>
         </div>
@@ -305,7 +373,7 @@
             </div>
             <div class="message-body">
               <p>안녕하세요. 저는 이번 과제에서 여러분과 함께 생존 물품의 우선순위를 검토할 AI 조수입니다.</p>
-              <p>비행기가 사막에 불시착했고, 구조를 기다리는 동안 사용할 수 있는 물품 15개의 순위를 정해야 합니다. 먼저 <b>가장 중요하다고 생각한 물품 3개</b>와 그 이유를 알려주세요.</p>
+              <p>비행기가 사막에 불시착했고, 구조를 기다리는 동안 사용할 수 있는 물품 15개의 순위를 정해야 합니다. 먼저 오른쪽의 <b>순위 패널에서 15개 물품의 초기 순위</b>를 정해 제출해 주세요. 제출하는 순간 제 초기 순위도 함께 공개됩니다.</p>
               <div class="msg-meta">AI · 과제 시작</div>
             </div>
           </article>
@@ -315,16 +383,61 @@
       <div class="composer-wrap">
         <div class="composer">
           <div class="input-shell">
-            <textarea id="messageInput" rows="1" aria-label="메시지 입력" placeholder="AI 연구 조수에게 메시지 보내기"></textarea>
+            <textarea id="messageInput" rows="1" aria-label="메시지 입력" placeholder="초기 순위를 제출하면 대화를 시작할 수 있습니다" disabled></textarea>
             <button class="send" id="sendBtn" aria-label="메시지 보내기" disabled>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M6.5 10.5 12 5l5.5 5.5"/></svg>
             </button>
           </div>
-          <div class="footnote">AI는 부정확한 정보를 제공할 수 있습니다. 연구 지침에 따라 판단해 주세요.</div>
+          <div class="footnote" id="composerNote">먼저 순위 패널에서 초기 순위를 제출해 주세요.</div>
         </div>
       </div>
     </main>
   </div>
+
+  <aside class="rank-panel" id="rankPanel" aria-label="생존 물품 순위 패널">
+    <div class="rank-head">
+      <div><strong>생존 물품 우선순위</strong><span id="rankSubtitle">1단계 · 초기 판단</span></div>
+      <button class="rank-close" id="rankClose" aria-label="순위 패널 닫기">×</button>
+    </div>
+    <div class="rank-progress">
+      <div class="rank-step active" data-step="1" id="stepInitial">초기 순위</div>
+      <div class="rank-step" data-step="2" id="stepDiscuss">AI 토론</div>
+      <div class="rank-step" data-step="3" id="stepFinal">최종 순위</div>
+    </div>
+    <div class="rank-content">
+      <section class="panel-stage" id="initialStage">
+        <div class="rank-intro"><b>중요한 순서로 정렬해 주세요.</b><br />물품을 끌어서 옮기거나 화살표 버튼을 사용할 수 있습니다. AI의 순위는 제출 전까지 공개되지 않습니다.</div>
+        <ol class="rank-list" id="initialRankList"></ol>
+        <div class="rank-action">
+          <button class="primary" id="submitInitialRank">초기 순위 제출하고 동시 공개</button>
+          <div class="rank-helper">제출 후 초기 순위는 수정할 수 없습니다.</div>
+        </div>
+      </section>
+
+      <section class="panel-stage" id="revealedStage" hidden>
+        <div class="reveal-card"><b>양쪽의 초기 순위가 공개되었습니다.</b><p>순위 차이를 살펴보고 채팅에서 서로의 판단 근거를 논의하세요.</p></div>
+        <div class="compare-head"><span>순위</span><span>나</span><span>AI</span></div>
+        <div class="comparison" id="rankComparison"></div>
+        <div class="rank-action">
+          <button class="primary" id="startFinalRank" disabled>대화 후 최종 순위 작성</button>
+          <div class="rank-helper" id="finalRankHint">AI와 메시지를 한 번 이상 주고받으면 활성화됩니다.</div>
+        </div>
+      </section>
+
+      <section class="panel-stage" id="finalStage" hidden>
+        <div class="rank-intro"><b>토론을 반영한 최종 순위입니다.</b><br />초기 순위에서 바꾸고 싶은 물품을 끌어서 재정렬한 뒤 제출해 주세요.</div>
+        <ol class="rank-list" id="finalRankList"></ol>
+        <div class="rank-action">
+          <button class="primary" id="submitFinalRank">최종 순위 제출</button>
+          <div class="rank-helper">제출 후에는 순위가 확정됩니다.</div>
+        </div>
+      </section>
+
+      <section class="panel-stage" id="completeStage" hidden>
+        <div class="completion-card"><div class="completion-icon">✓</div><h3>최종 순위가 제출되었습니다.</h3><p>초기 순위, AI 순위, 최종 순위와 대화 기록이 세션 데이터에 저장되었습니다.</p></div>
+      </section>
+    </div>
+  </aside>
 
   <div class="modal-backdrop" id="taskModal" role="dialog" aria-modal="true" aria-labelledby="taskTitle">
     <div class="modal">
@@ -370,6 +483,8 @@
       const startedAt = new Date();
       const sessionId = `S1-${startedAt.toISOString().slice(0,10).replaceAll('-', '')}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
       const participantId = `P-${String(Math.floor(1000 + Math.random() * 9000))}`;
+      const rankingItems = ['손전등', '사막 지역 지도', '1인당 물 1리터', '소형 거울', '낙하산', '권총', '소금 정제', '책 《사막의 식용 동물》', '나침반', '보드카 1병', '두꺼운 외투', '접이식 칼', '응급처치함', '비옷', '선글라스'];
+      const aiInitialRanking = ['소형 거울', '두꺼운 외투', '1인당 물 1리터', '손전등', '낙하산', '접이식 칼', '비옷', '권총', '선글라스', '응급처치함', '나침반', '사막 지역 지도', '책 《사막의 식용 동물》', '보드카 1병', '소금 정제'];
       const state = {
         study: 'Study 1 — interpersonal disposition transfer to AI',
         sessionId,
@@ -377,9 +492,17 @@
         condition: 'B_AI_COLLABORATIVE',
         startedAt: startedAt.toISOString(),
         mode: 'prototype_simulation',
+        phase: 'initial_ranking',
+        initialRanking: null,
+        aiInitialRanking: null,
+        finalRanking: null,
+        rankingMoves: [],
         events: [{ type: 'session_start', at: startedAt.toISOString() }],
-        messages: [{ role: 'assistant', at: startedAt.toISOString(), content: '과제 시작 안내 및 중요 물품 3개 요청' }]
+        messages: [{ role: 'assistant', at: startedAt.toISOString(), content: '과제 시작 안내 및 초기 순위 제출 요청' }]
       };
+      let initialWorkingRanking = [...rankingItems];
+      let finalWorkingRanking = [];
+      let draggedIndex = null;
 
       const input = $('#messageInput');
       const sendBtn = $('#sendBtn');
@@ -389,6 +512,8 @@
       const toast = $('#toast');
       const sidebar = $('#sidebar');
       const sidebarScrim = $('#sidebarScrim');
+      const rankPanel = $('#rankPanel');
+      const composerNote = $('#composerNote');
 
       $('#participantLabel').textContent = `참가자 ${participantId}`;
       $('#metaParticipant').textContent = participantId;
@@ -406,6 +531,124 @@
       function scrollToEnd() {
         requestAnimationFrame(() => { conversation.scrollTop = conversation.scrollHeight; });
       }
+
+      function setRankPanel(open) {
+        document.body.classList.toggle('rank-open', open);
+        state.events.push({ type: open ? 'ranking_panel_opened' : 'ranking_panel_closed', phase: state.phase, at: new Date().toISOString() });
+      }
+
+      function setStage(stage) {
+        ['initialStage', 'revealedStage', 'finalStage', 'completeStage'].forEach(id => {
+          document.getElementById(id).hidden = id !== stage;
+        });
+        const phaseMap = {
+          initialStage: ['1단계 · 초기 판단', 1],
+          revealedStage: ['2단계 · AI와 토론', 2],
+          finalStage: ['3단계 · 최종 판단', 3],
+          completeStage: ['제출 완료', 4]
+        };
+        const [subtitle, activeStep] = phaseMap[stage];
+        $('#rankSubtitle').textContent = subtitle;
+        [$('#stepInitial'), $('#stepDiscuss'), $('#stepFinal')].forEach((step, index) => {
+          step.classList.toggle('active', activeStep === index + 1);
+          step.classList.toggle('done', activeStep > index + 1);
+        });
+      }
+
+      function moveRankingItem(list, from, to, source) {
+        if (from === to || from < 0 || to < 0 || from >= list.length || to >= list.length) return;
+        const [item] = list.splice(from, 1);
+        list.splice(to, 0, item);
+        state.rankingMoves.push({ phase: source, item, from: from + 1, to: to + 1, at: new Date().toISOString() });
+        renderRankList(source === 'initial' ? $('#initialRankList') : $('#finalRankList'), list, source);
+      }
+
+      function renderRankList(container, list, source) {
+        container.innerHTML = '';
+        list.forEach((item, index) => {
+          const row = document.createElement('li');
+          row.className = 'rank-item';
+          row.draggable = true;
+          row.dataset.index = String(index);
+          row.innerHTML = `<span class="rank-number">${index + 1}</span><span class="drag-handle" aria-hidden="true">⠿</span><span class="rank-name" title="${escapeHTML(item)}">${escapeHTML(item)}</span><button class="move-btn move-up" aria-label="${escapeHTML(item)} 순위 올리기" ${index === 0 ? 'disabled' : ''}>↑</button><button class="move-btn move-down" aria-label="${escapeHTML(item)} 순위 내리기" ${index === list.length - 1 ? 'disabled' : ''}>↓</button>`;
+          row.addEventListener('dragstart', event => {
+            draggedIndex = index;
+            row.classList.add('dragging');
+            event.dataTransfer.effectAllowed = 'move';
+          });
+          row.addEventListener('dragend', () => {
+            draggedIndex = null;
+            $$('.rank-item').forEach(el => el.classList.remove('dragging', 'drag-over'));
+          });
+          row.addEventListener('dragover', event => {
+            event.preventDefault();
+            row.classList.add('drag-over');
+          });
+          row.addEventListener('dragleave', () => row.classList.remove('drag-over'));
+          row.addEventListener('drop', event => {
+            event.preventDefault();
+            row.classList.remove('drag-over');
+            if (draggedIndex !== null) moveRankingItem(list, draggedIndex, index, source);
+          });
+          $('.move-up', row).addEventListener('click', () => moveRankingItem(list, index, index - 1, source));
+          $('.move-down', row).addEventListener('click', () => moveRankingItem(list, index, index + 1, source));
+          container.appendChild(row);
+        });
+      }
+
+      function renderComparison() {
+        const comparison = $('#rankComparison');
+        comparison.innerHTML = state.initialRanking.map((item, index) => `<div class="compare-row"><span class="n">${index + 1}</span><span title="${escapeHTML(item)}">${escapeHTML(item)}</span><span title="${escapeHTML(aiInitialRanking[index])}">${escapeHTML(aiInitialRanking[index])}</span></div>`).join('');
+      }
+
+      function addRankingRevealMessage() {
+        const participantTop = state.initialRanking.slice(0, 5);
+        const aiTop = aiInitialRanking.slice(0, 5);
+        const rows = participantTop.map((item, index) => `<div><b>${index + 1}</b><span>${escapeHTML(item)}</span><span>${escapeHTML(aiTop[index])}</span></div>`).join('');
+        const html = `<p><b>초기 순위가 동시에 공개되었습니다.</b> 아래는 서로의 상위 5개 물품입니다.</p><div class="chat-rank-card"><div><span>#</span><span>참가자</span><span>AI</span></div>${rows}</div><p>저는 구조 신호를 보낼 수 있는 <b>소형 거울</b>을 1순위로 판단했습니다. 참가자님의 상위 순위에서 가장 중요하게 고려한 기준은 무엇인가요?</p>`;
+        addAssistantMessage(html, 0);
+      }
+
+      function submitInitialRanking() {
+        state.initialRanking = [...initialWorkingRanking];
+        state.aiInitialRanking = [...aiInitialRanking];
+        state.phase = 'discussion';
+        state.events.push({ type: 'initial_rankings_revealed', participantRanking: [...state.initialRanking], aiRanking: [...aiInitialRanking], at: new Date().toISOString() });
+        renderComparison();
+        setStage('revealedStage');
+        input.disabled = false;
+        input.placeholder = '서로의 순위 차이에 관해 대화해 보세요';
+        composerNote.textContent = '초기 순위가 공개되었습니다. AI와 판단 근거를 논의해 주세요.';
+        addRankingRevealMessage();
+        input.focus();
+      }
+
+      function beginFinalRanking() {
+        finalWorkingRanking = [...state.initialRanking];
+        state.phase = 'final_ranking';
+        state.events.push({ type: 'final_ranking_started', at: new Date().toISOString() });
+        renderRankList($('#finalRankList'), finalWorkingRanking, 'final');
+        setStage('finalStage');
+        setRankPanel(true);
+      }
+
+      function submitFinalRanking() {
+        state.finalRanking = [...finalWorkingRanking];
+        state.phase = 'complete';
+        state.completedAt = new Date().toISOString();
+        state.events.push({ type: 'final_ranking_submitted', ranking: [...state.finalRanking], at: state.completedAt });
+        setStage('completeStage');
+        input.disabled = true;
+        input.placeholder = '최종 순위가 제출되었습니다';
+        sendBtn.disabled = true;
+        composerNote.textContent = '과제가 완료되었습니다. 연구자의 다음 안내를 기다려 주세요.';
+        addAssistantMessage('<p><b>최종 순위 제출이 완료되었습니다.</b></p><p>토론에 참여해 주셔서 감사합니다. 이제 다음 연구 단계로 이동해 주세요.</p>', 0);
+        showToast('최종 순위가 저장되었습니다.');
+      }
+
+      renderRankList($('#initialRankList'), initialWorkingRanking, 'initial');
+      setStage('initialStage');
+      setRankPanel(true);
 
       function addUserMessage(text) {
         const article = document.createElement('article');
@@ -461,7 +704,7 @@
 
       function submitMessage() {
         const text = input.value.trim();
-        if (!text || sendBtn.disabled) return;
+        if (!text || sendBtn.disabled || !['discussion', 'final_ranking'].includes(state.phase)) return;
         const turn = state.messages.filter(m => m.role === 'user').length + 1;
         addUserMessage(text);
         input.value = '';
@@ -472,13 +715,17 @@
         setTimeout(() => {
           addAssistantMessage(generateReply(text, turn), latency);
           sendBtn.disabled = !input.value.trim();
+          if (state.phase === 'discussion') {
+            $('#startFinalRank').disabled = false;
+            $('#finalRankHint').textContent = '대화를 더 이어가거나 최종 순위를 작성할 수 있습니다.';
+          }
         }, latency);
       }
 
       input.addEventListener('input', () => {
         input.style.height = 'auto';
         input.style.height = `${Math.min(input.scrollHeight, 150)}px`;
-        sendBtn.disabled = !input.value.trim() || !!$('#typingMessage');
+        sendBtn.disabled = input.disabled || !input.value.trim() || !!$('#typingMessage');
       });
       input.addEventListener('keydown', event => {
         if (event.key === 'Enter' && !event.shiftKey) {
@@ -487,6 +734,11 @@
         }
       });
       sendBtn.addEventListener('click', submitMessage);
+      $('#rankToggle').addEventListener('click', () => setRankPanel(!document.body.classList.contains('rank-open')));
+      $('#rankClose').addEventListener('click', () => setRankPanel(false));
+      $('#submitInitialRank').addEventListener('click', submitInitialRanking);
+      $('#startFinalRank').addEventListener('click', beginFinalRanking);
+      $('#submitFinalRank').addEventListener('click', submitFinalRanking);
 
       setInterval(() => {
         const seconds = Math.floor((Date.now() - startedAt.getTime()) / 1000);

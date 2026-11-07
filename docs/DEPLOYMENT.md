@@ -7,7 +7,7 @@ Create an empty private repository, for example `study1-ai-dialogue-platform`, w
 ## 2. Create and initialize Supabase
 
 1. Create a Supabase project in the region approved for the study.
-2. Open **SQL Editor** and run `supabase/migrations/202611070001_research_schema.sql`.
+2. Open **SQL Editor** and run every file in `supabase/migrations/` in filename order. Existing projects should apply only the newer, unapplied migrations.
 3. Copy the project URL and a server-side secret key.
 4. Never expose the secret or legacy `service_role` key in browser code.
 

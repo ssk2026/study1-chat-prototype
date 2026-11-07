@@ -4,7 +4,7 @@ ChatGPT형 연구 인터페이스에 Vercel Functions, OpenAI Responses API, Sup
 
 ## 과제
 
-- **TASK 1:** 사막 생존 물품 초기 순위 → AI 토론 → 최종 순위
+- **TASK 1:** 플랫폼 튜토리얼 → 5분 초기 순위·선택적 근거 → 10분간 15개 물품별 AI 협업·합의 순위 → 최종 검토·제출
 - **TASK 2:** 일상 갈등 초기 책임 판단 → 반대 입장 AI 토론 → 최종 판단
 
 ## 구조

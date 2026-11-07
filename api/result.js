@@ -5,6 +5,11 @@ function validRanking(value) {
   return Array.isArray(value) && value.length === 15 && new Set(value).size === 15 && value.every((x) => typeof x === "string");
 }
 
+function limitedObject(value, maxKeys = 20) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value).slice(0, maxKeys).map(([key, item]) => [key.slice(0, 120), String(item ?? "").slice(0, 2000)]));
+}
+
 export async function POST(request) {
   try {
     const body = await readJson(request);
@@ -14,7 +19,7 @@ export async function POST(request) {
     if (session.task_code !== taskCode) throw new HttpError(409, "세션의 과제 코드가 일치하지 않습니다.");
 
     if (taskCode === "TASK_1_DESERT") {
-      for (const key of ["initialRanking", "aiRanking", "finalRanking"]) {
+      for (const key of ["initialRanking", "aiRanking", "consensusRanking", "finalRanking"]) {
         if (body[key] != null && !validRanking(body[key])) throw new HttpError(400, `${key} 형식이 올바르지 않습니다.`);
       }
       await supabaseRequest("task1_rankings?on_conflict=session_id", {
@@ -23,7 +28,10 @@ export async function POST(request) {
         body: {
           session_id: sessionId,
           initial_ranking: body.initialRanking ?? null,
+          initial_rationales: limitedObject(body.initialRationales),
           ai_ranking: body.aiRanking ?? null,
+          consensus_ranking: body.consensusRanking ?? null,
+          item_decisions: Array.isArray(body.itemDecisions) ? body.itemDecisions.slice(0, 30) : [],
           final_ranking: body.finalRanking ?? null,
           ranking_moves: Array.isArray(body.rankingMoves) ? body.rankingMoves : [],
         },

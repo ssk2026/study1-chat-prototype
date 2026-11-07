@@ -477,6 +477,7 @@
 
   <div class="toast" id="toast" role="status"></div>
 
+  <script src="/dist/research-api.js"></script>
   <script>
     (() => {
       const $ = (selector, root = document) => root.querySelector(selector);
@@ -492,7 +493,8 @@
         participantId,
         condition: 'B_AI_COLLABORATIVE',
         startedAt: startedAt.toISOString(),
-        mode: 'prototype_simulation',
+        mode: window.ResearchAPI.isSimulation() ? 'local_simulation' : 'server',
+        serverSessionId: null,
         phase: 'initial_ranking',
         initialRanking: null,
         aiInitialRanking: null,
@@ -610,9 +612,21 @@
         addAssistantMessage(html, 0);
       }
 
-      function submitInitialRanking() {
+      async function submitInitialRanking() {
+        $('#submitInitialRank').disabled = true;
         state.initialRanking = [...initialWorkingRanking];
         state.aiInitialRanking = [...aiInitialRanking];
+        try {
+          await window.ResearchAPI.saveResult(state, {
+            taskCode: 'TASK_1_DESERT',
+            conditionCode: state.condition,
+            result: { initialRanking: state.initialRanking, aiRanking: state.aiInitialRanking, rankingMoves: state.rankingMoves },
+          });
+        } catch (error) {
+          $('#submitInitialRank').disabled = false;
+          showToast(`초기 순위를 저장하지 못했습니다: ${error.message}`);
+          return;
+        }
         state.phase = 'discussion';
         state.events.push({ type: 'initial_rankings_revealed', participantRanking: [...state.initialRanking], aiRanking: [...aiInitialRanking], at: new Date().toISOString() });
         renderComparison();
@@ -633,8 +647,26 @@
         setRankPanel(true);
       }
 
-      function submitFinalRanking() {
+      async function submitFinalRanking() {
+        $('#submitFinalRank').disabled = true;
         state.finalRanking = [...finalWorkingRanking];
+        try {
+          await window.ResearchAPI.saveResult(state, {
+            taskCode: 'TASK_1_DESERT',
+            conditionCode: state.condition,
+            result: {
+              initialRanking: state.initialRanking,
+              aiRanking: state.aiInitialRanking,
+              finalRanking: state.finalRanking,
+              rankingMoves: state.rankingMoves,
+              complete: true,
+            },
+          });
+        } catch (error) {
+          $('#submitFinalRank').disabled = false;
+          showToast(`최종 순위를 저장하지 못했습니다: ${error.message}`);
+          return;
+        }
         state.phase = 'complete';
         state.completedAt = new Date().toISOString();
         state.events.push({ type: 'final_ranking_submitted', ranking: [...state.finalRanking], at: state.completedAt });
@@ -703,7 +735,7 @@
         scrollToEnd();
       }
 
-      function submitMessage() {
+      async function submitMessage() {
         const text = input.value.trim();
         if (!text || sendBtn.disabled || !['discussion', 'final_ranking'].includes(state.phase)) return;
         const turn = state.messages.filter(m => m.role === 'user').length + 1;
@@ -712,6 +744,28 @@
         input.style.height = 'auto';
         sendBtn.disabled = true;
         addTyping();
+        if (!window.ResearchAPI.isSimulation()) {
+          try {
+            const result = await window.ResearchAPI.chat(state, {
+              taskCode: 'TASK_1_DESERT',
+              conditionCode: state.condition,
+              message: text,
+              turnIndex: turn,
+              context: { initialRanking: state.initialRanking, aiRanking: state.aiInitialRanking, phase: state.phase },
+            });
+            addAssistantMessage(escapeHTML(result.text).replace(/\n/g, '<br>'), result.latencyMs);
+            if (state.phase === 'discussion') {
+              $('#startFinalRank').disabled = false;
+              $('#finalRankHint').textContent = '대화를 더 이어가거나 최종 순위를 작성할 수 있습니다.';
+            }
+          } catch (error) {
+            $('#typingMessage')?.remove();
+            input.value = text;
+            showToast(`AI 응답을 받지 못했습니다: ${error.message}`);
+          }
+          sendBtn.disabled = !input.value.trim();
+          return;
+        }
         const latency = 850 + Math.floor(Math.random() * 650);
         setTimeout(() => {
           addAssistantMessage(generateReply(text, turn), latency);

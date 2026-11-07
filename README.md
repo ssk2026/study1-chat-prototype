@@ -1,25 +1,37 @@
-# Study 1 AI 대화 연구 프로토타입
+# Study 1 AI 대화 연구 플랫폼
 
-브라우저에서 `dist/index.html`을 열면 실행되는 단일 HTML 프로토타입입니다.
+ChatGPT형 연구 인터페이스에 Vercel Functions, OpenAI Responses API, Supabase 데이터 저장 구조를 결합한 프로젝트입니다.
 
-## 포함 기능
+## 과제
 
-- ChatGPT와 유사한 반응형 대화 인터페이스
-- 사막 생존 과제 안내
-- 드래그·화살표 방식의 15개 물품 순위 입력
-- 참가자와 AI의 초기 순위 동시 공개
-- 대화 후 최종 순위 제출 및 초기–최종 변화 기록
-- TASK 2 일상 갈등 책임 토론: 초기 판단, 반대 입장 AI 토론, 최종 판단
-- 시뮬레이션 AI 응답
-- 참가자·세션 ID와 메시지 타임스탬프 기록
-- 연구 세션 JSON 내보내기
+- **TASK 1:** 사막 생존 물품 초기 순위 → AI 토론 → 최종 순위
+- **TASK 2:** 일상 갈등 초기 책임 판단 → 반대 입장 AI 토론 → 최종 판단
 
-## 연구 적용 전 필요한 작업
+## 구조
 
-- 서버 측 LLM API 프록시 연결
-- 참가자 동의 및 설문 흐름 연결
-- 조건 무작위 배정과 조작 검증
-- 인증, 암호화 저장, 접근권한 및 보존기간 설정
-- IRB 승인 문구와 실제 과제·척도 확정
+```text
+dist/                 참가자용 정적 UI
+api/                  Vercel Functions
+lib/                  OpenAI·Supabase 서버 전용 코드
+supabase/migrations/  재현 가능한 데이터베이스 스키마
+docs/DEPLOYMENT.md    GitHub·Supabase·Vercel 연결 절차
+```
 
-API 키를 정적 HTML에 직접 넣지 마세요. 실제 모델 연결은 반드시 서버를 통해 처리해야 합니다.
+브라우저는 `/api/*`만 호출합니다. `OPENAI_API_KEY`와 Supabase secret key는 Vercel 서버 환경변수에만 저장하며 HTML에는 포함하지 않습니다.
+
+## 로컬 UI 확인
+
+`dist/index.html` 또는 `dist/task2.html`을 직접 열거나 정적 서버로 제공하면 자동으로 시뮬레이션 모드가 사용됩니다. 배포 환경에서는 서버 API와 데이터베이스 연결에 실패할 경우 연구 자료 누락을 막기 위해 제출을 완료하지 않습니다.
+
+## 배포
+
+[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)를 따르세요. 필요한 환경변수 이름은 `.env.example`에 있습니다.
+
+## 실제 연구 전 필수 사항
+
+- IRB 승인 문구와 동의·철회·사후설명 화면
+- 익명 참가자 ID 발급과 모집정보의 분리 보관
+- 조건 무작위 배정 및 조작점검
+- 정확한 OpenAI 모델 ID와 프롬프트 버전 고정
+- 자료 보존기간, 삭제 절차, 관리자 접근 통제
+- 모바일·중복 제출·네트워크 중단 파일럿 테스트

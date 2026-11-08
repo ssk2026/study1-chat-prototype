@@ -29,6 +29,33 @@
     });
   }
 
+  function localContrastingRanking(participantRanking, seed) {
+    let hash = 2166136261;
+    for (const char of `${seed}|${participantRanking.join("|")}`) {
+      hash ^= char.codePointAt(0);
+      hash = Math.imul(hash, 16777619);
+    }
+    let value = hash >>> 0;
+    const random = () => {
+      value += 0x6D2B79F5;
+      let mixed = value;
+      mixed = Math.imul(mixed ^ (mixed >>> 15), mixed | 1);
+      mixed ^= mixed + Math.imul(mixed ^ (mixed >>> 7), mixed | 61);
+      return ((mixed ^ (mixed >>> 14)) >>> 0) / 4294967296;
+    };
+    for (let attempt = 0; attempt < 100; attempt += 1) {
+      const candidate = [...participantRanking];
+      for (let index = candidate.length - 1; index > 0; index -= 1) {
+        const target = Math.floor(random() * (index + 1));
+        [candidate[index], candidate[target]] = [candidate[target], candidate[index]];
+      }
+      const differences = candidate.filter((item, index) => item !== participantRanking[index]).length;
+      if (differences >= 5) return { ranking: candidate, positionDifferences: differences, generationVersion: "seeded-v1-local" };
+    }
+    const ranking = participantRanking.map((_, index) => participantRanking[(index + 1) % participantRanking.length]);
+    return { ranking, positionDifferences: participantRanking.length, generationVersion: "seeded-v1-local" };
+  }
+
   async function ensureSession(state, { taskCode, conditionCode }) {
     if (simulation) return null;
     if (state.serverSessionId) return state.serverSessionId;
@@ -67,6 +94,15 @@
     });
   }
 
+  async function generateAiRanking(state, { taskCode, conditionCode, participantRanking }) {
+    if (simulation) return localContrastingRanking(participantRanking, state.sessionId);
+    const sessionId = await ensureSession(state, { taskCode, conditionCode });
+    return request("/api/ranking", {
+      method: "POST",
+      body: JSON.stringify({ sessionId, participantRanking }),
+    });
+  }
+
   async function saveResult(state, { taskCode, conditionCode, result }) {
     if (simulation) return { saved: false, simulation: true };
     const sessionId = await ensureSession(state, { taskCode, conditionCode });
@@ -90,6 +126,7 @@
     ensureSession,
     historyFrom,
     chat,
+    generateAiRanking,
     saveResult,
     logEvent,
   };

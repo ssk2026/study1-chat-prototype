@@ -1,8 +1,9 @@
 import { errorResponse, HttpError, json, readJson, requireString, requireTaskCode } from "../lib/http.js";
 import { findSession, supabaseRequest } from "../lib/supabase.js";
+import { isCompleteRanking } from "../lib/rankings.js";
 
 function validRanking(value) {
-  return Array.isArray(value) && value.length === 15 && new Set(value).size === 15 && value.every((x) => typeof x === "string");
+  return isCompleteRanking(value);
 }
 
 function limitedObject(value, maxKeys = 20) {

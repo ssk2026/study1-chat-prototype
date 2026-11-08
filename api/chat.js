@@ -1,6 +1,7 @@
 import { errorResponse, HttpError, json, readJson, requireString, requireTaskCode } from "../lib/http.js";
 import { createModelResponse } from "../lib/openai.js";
 import { buildInstructions, sanitizeHistory } from "../lib/prompts.js";
+import { createContrastingRanking, isCompleteRanking } from "../lib/rankings.js";
 import { findSession, saveMessage } from "../lib/supabase.js";
 
 export async function POST(request) {
@@ -16,6 +17,15 @@ export async function POST(request) {
 
     const history = sanitizeHistory(body.history);
     const turnIndex = Number.isInteger(body.turnIndex) ? body.turnIndex : history.filter((x) => x.role === "user").length + 1;
+    let context = body.context && typeof body.context === "object" ? body.context : {};
+    if (taskCode === "TASK_1_DESERT") {
+      if (!isCompleteRanking(context.participantRanking)) throw new HttpError(400, "참가자의 초기 순위가 올바르지 않습니다.");
+      context = {
+        ...context,
+        aiRanking: createContrastingRanking(context.participantRanking, { seed: sessionId, minDifferences: 5 }),
+      };
+    }
+
     await saveMessage({
       session_id: sessionId,
       client_message_id: clientMessageId,
@@ -27,7 +37,7 @@ export async function POST(request) {
     });
 
     const generated = await createModelResponse({
-      instructions: buildInstructions(taskCode, body.context),
+      instructions: buildInstructions(taskCode, context),
       input: [...history, { role: "user", content: message }],
       clientRequestId: clientMessageId,
     });

@@ -8,7 +8,7 @@ Create an empty private repository, for example `study1-ai-dialogue-platform`, w
 
 1. Create a Supabase project in the region approved for the study.
 2. Open **SQL Editor** and run every file in `supabase/migrations/` in filename order. Existing projects should apply only the newer, unapplied migrations.
-3. Copy the project URL and a server-side secret key.
+3. Copy the project URL and a current `sb_secret_...` server-side secret key from **Settings → API Keys**.
 4. Never expose the secret or legacy `service_role` key in browser code.
 
 ## 3. Import the GitHub repository into Vercel
@@ -20,7 +20,7 @@ Add these Production, Preview, and Development environment variables:
 - `OPENAI_API_KEY`
 - `OPENAI_MODEL` — pin the exact model ID selected for the preregistered study
 - `SUPABASE_URL`
-- `SUPABASE_SECRET_KEY`
+- `SUPABASE_SECRET_KEY` — use the current `sb_secret_...` key; keep it server-side
 - `STUDY_VERSION`
 
 Deploy, then check `/api/health`. Both `configured.openai` and `configured.supabase` must be `true` before participant access is enabled.

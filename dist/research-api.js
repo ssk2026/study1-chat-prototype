@@ -77,6 +77,27 @@
     return data.sessionId;
   }
 
+  async function publicConfig() {
+    if (simulation) return { consentVersion: "consent-draft-v1", postSurveyUrl: "" };
+    return request("/api/public-config");
+  }
+
+  async function validateParticipantCode(code) {
+    if (simulation) return { valid: true, consentRequired: true, resumeAvailable: false, taskCompleted: false };
+    return request("/api/participant", { method: "POST", body: JSON.stringify({ action: "validate", code }) });
+  }
+
+  async function startParticipant(state, { code, consentAccepted, consentVersion }) {
+    if (simulation) {
+      state.participantId = code || "TEST-CODE";
+      return { sessionId: null, participantId: state.participantId, taskCompleted: false, resume: null, postSurveyUrl: "" };
+    }
+    const data = await request("/api/participant", { method: "POST", body: JSON.stringify({ action: "start", code, consentAccepted, consentVersion }) });
+    state.serverSessionId = data.sessionId;
+    state.participantId = data.participantId;
+    return data;
+  }
+
   async function chat(state, { taskCode, conditionCode, message, context, turnIndex }) {
     const sessionId = await ensureSession(state, { taskCode, conditionCode });
     const clientMessageId = crypto.randomUUID();
@@ -124,6 +145,9 @@
   window.ResearchAPI = {
     isSimulation: () => simulation,
     ensureSession,
+    publicConfig,
+    validateParticipantCode,
+    startParticipant,
     historyFrom,
     chat,
     generateAiRanking,

@@ -57,10 +57,16 @@ export async function POST(request) {
     }
 
     if (body.complete) {
+      const completedAt = new Date().toISOString();
       await supabaseRequest(`sessions?id=eq.${encodeURIComponent(sessionId)}`, {
         method: "PATCH",
         prefer: "return=minimal",
-        body: { status: "complete", completed_at: new Date().toISOString() },
+        body: { status: "complete", completed_at: completedAt },
+      });
+      if (taskCode === "TASK_1_DESERT") await supabaseRequest(`participant_codes?session_id=eq.${encodeURIComponent(sessionId)}`, {
+        method: "PATCH",
+        prefer: "return=minimal",
+        body: { status: "task_completed", completed_at: completedAt, last_seen_at: completedAt },
       });
     }
     return json({ saved: true, complete: Boolean(body.complete) });

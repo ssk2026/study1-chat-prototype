@@ -10,7 +10,7 @@ function normalizeCode(value) {
 }
 
 function assertCode(code) {
-  if (!/^[A-Z0-9-]{8,32}$/.test(code)) throw new HttpError(400, "참가자 코드를 다시 확인해 주세요.");
+  if (!/^\d{8}$/.test(code)) throw new HttpError(400, "참가자 코드는 숫자 8자리로 입력해 주세요.");
 }
 
 async function findCode(code) {

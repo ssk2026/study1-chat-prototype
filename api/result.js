@@ -31,10 +31,14 @@ export async function POST(request) {
           initial_ranking: body.initialRanking ?? null,
           initial_rationales: limitedObject(body.initialRationales),
           ai_ranking: body.aiRanking ?? null,
+          ai_ranking_generation_version: body.aiRankingGenerationVersion ?? null,
           consensus_ranking: body.consensusRanking ?? null,
+          current_ranking: body.finalRanking ?? body.consensusRanking ?? null,
           item_decisions: Array.isArray(body.itemDecisions) ? body.itemDecisions.slice(0, 30) : [],
+          discussion_turns: Number.isInteger(body.discussionTurns) ? Math.max(0, Math.min(200, body.discussionTurns)) : 0,
           final_ranking: body.finalRanking ?? null,
           ranking_moves: Array.isArray(body.rankingMoves) ? body.rankingMoves : [],
+          updated_at: new Date().toISOString(),
         },
       });
     } else {
@@ -61,7 +65,7 @@ export async function POST(request) {
       await supabaseRequest(`sessions?id=eq.${encodeURIComponent(sessionId)}`, {
         method: "PATCH",
         prefer: "return=minimal",
-        body: { status: "complete", completed_at: completedAt },
+        body: { status: "complete", current_stage: "complete", completed_at: completedAt, last_seen_at: completedAt },
       });
       if (taskCode === "TASK_1_DESERT") await supabaseRequest(`participant_codes?session_id=eq.${encodeURIComponent(sessionId)}`, {
         method: "PATCH",

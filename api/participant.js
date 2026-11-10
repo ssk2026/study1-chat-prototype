@@ -22,11 +22,12 @@ async function findCode(code) {
 
 async function loadResume(sessionId) {
   if (!sessionId) return null;
-  const [rankings, messages] = await Promise.all([
-    supabaseRequest(`task1_rankings?session_id=eq.${encodeURIComponent(sessionId)}&select=initial_ranking,initial_rationales,ai_ranking,consensus_ranking,item_decisions,final_ranking&limit=1`),
+  const [sessions, rankings, messages] = await Promise.all([
+    supabaseRequest(`sessions?id=eq.${encodeURIComponent(sessionId)}&select=current_stage,stage_started_at,last_seen_at,prompt_version,model_config,status&limit=1`),
+    supabaseRequest(`task1_rankings?session_id=eq.${encodeURIComponent(sessionId)}&select=initial_draft_ranking,initial_draft_rationales,initial_ranking,initial_rationales,ai_ranking,ai_ranking_generation_version,current_ranking,consensus_ranking,item_decisions,discussion_turns,final_ranking&limit=1`),
     supabaseRequest(`messages?session_id=eq.${encodeURIComponent(sessionId)}&select=role,content,turn_index,created_at&order=created_at.asc&limit=200`),
   ]);
-  return { ranking: rankings?.[0] ?? null, messages: messages ?? [] };
+  return { session: sessions?.[0] ?? null, ranking: rankings?.[0] ?? null, messages: messages ?? [] };
 }
 
 export async function POST(request) {
@@ -59,6 +60,15 @@ export async function POST(request) {
           condition_code: CONDITION_CODE,
           status: "active",
           started_at: issued.started_at || now,
+          current_stage: "intro",
+          stage_started_at: now,
+          last_seen_at: now,
+          prompt_version: process.env.PROMPT_VERSION || "unversioned",
+          model_config: {
+            model: process.env.OPENAI_MODEL || "unconfigured",
+            maxOutputTokens: Number.parseInt(process.env.OPENAI_MAX_OUTPUT_TOKENS || "600", 10) || 600,
+            temperature: process.env.OPENAI_TEMPERATURE || null,
+          },
           metadata: { recruitment: "issued_code", consentVersion },
         },
       });
@@ -67,6 +77,11 @@ export async function POST(request) {
     }
 
     if (!taskCompleted) {
+      await supabaseRequest(`sessions?id=eq.${encodeURIComponent(sessionId)}`, {
+        method: "PATCH",
+        prefer: "return=minimal",
+        body: { last_seen_at: now },
+      });
       await supabaseRequest(`participant_codes?code=eq.${encodeURIComponent(code)}`, {
         method: "PATCH",
         prefer: "return=minimal",

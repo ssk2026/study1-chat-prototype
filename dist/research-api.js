@@ -98,9 +98,8 @@
     return data;
   }
 
-  async function chat(state, { taskCode, conditionCode, message, context, turnIndex }) {
+  async function chat(state, { taskCode, conditionCode, message, context, turnIndex, clientMessageId = crypto.randomUUID() }) {
     const sessionId = await ensureSession(state, { taskCode, conditionCode });
-    const clientMessageId = crypto.randomUUID();
     return request("/api/chat", {
       method: "POST",
       body: JSON.stringify({
@@ -112,6 +111,15 @@
         context,
         turnIndex,
       }),
+    });
+  }
+
+  async function saveProgress(state, { taskCode, conditionCode, stage, ranking, reasons, stageStartedAt }) {
+    if (simulation) return { saved: false, simulation: true };
+    const sessionId = await ensureSession(state, { taskCode, conditionCode });
+    return request("/api/progress", {
+      method: "POST",
+      body: JSON.stringify({ sessionId, stage, ranking, reasons, stageStartedAt }),
     });
   }
 
@@ -150,6 +158,7 @@
     startParticipant,
     historyFrom,
     chat,
+    saveProgress,
     generateAiRanking,
     saveResult,
     logEvent,

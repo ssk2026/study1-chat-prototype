@@ -78,7 +78,7 @@
   }
 
   async function publicConfig() {
-    if (simulation) return { consentVersion: "consent-draft-v1", postSurveyUrl: "" };
+    if (simulation && localHosts.has(location.hostname)) return { consentVersion: "consent-draft-v1", postSurveyUrl: "" };
     return request("/api/public-config");
   }
 

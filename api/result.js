@@ -2,6 +2,8 @@ import { errorResponse, HttpError, json, readJson, requireString, requireTaskCod
 import { findSession, supabaseRequest } from "../lib/supabase.js";
 import { isCompleteRanking } from "../lib/rankings.js";
 
+const MINIMUM_DISCUSSION_TURNS = 10;
+
 function validRanking(value) {
   return isCompleteRanking(value);
 }
@@ -22,6 +24,12 @@ export async function POST(request) {
     if (taskCode === "TASK_1_DESERT") {
       for (const key of ["initialRanking", "aiRanking", "consensusRanking", "finalRanking"]) {
         if (body[key] != null && !validRanking(body[key])) throw new HttpError(400, `${key} 형식이 올바르지 않습니다.`);
+      }
+      if (body.complete) {
+        const userMessages = await supabaseRequest(`messages?session_id=eq.${encodeURIComponent(sessionId)}&role=eq.user&select=id&limit=${MINIMUM_DISCUSSION_TURNS}`);
+        if ((userMessages?.length ?? 0) < MINIMUM_DISCUSSION_TURNS) {
+          throw new HttpError(409, `AI와 최소 ${MINIMUM_DISCUSSION_TURNS}턴 대화한 뒤 제출해 주세요.`);
+        }
       }
       await supabaseRequest("task1_rankings?on_conflict=session_id", {
         method: "POST",

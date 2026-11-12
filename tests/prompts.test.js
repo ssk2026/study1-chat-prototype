@@ -18,6 +18,8 @@ test("TASK 1 시스템 프롬프트에 검증된 순위와 연구 지침을 주�
   assert.match(prompt, /발화량의 약 0\.5~1\.5배/);
   assert.match(prompt, /물품을 하나씩 살펴보자고 제안/);
   assert.match(prompt, /초기 순위 1위로 정한 물품/);
+  assert.match(prompt, /이후 모든 대화를 AI가 주도.*필요는 없습니다/);
+  assert.match(prompt, /참가자가 먼저 언급한 물품과 질문을 중심/);
   assert.match(prompt, /외부 검색/);
   assert.match(prompt, /실제 사전 조사가 존재하지 않는다는 사실/);
   assert.match(prompt, /참가자의 초기 순위: 1위 손전등/);

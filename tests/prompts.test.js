@@ -14,6 +14,7 @@ test("TASK 1 시스템 프롬프트에 검증된 순위와 연구 지침을 주�
   });
 
   assert.match(prompt, /친근한 한국어 존댓말/);
+  assert.match(prompt, /반말.*사용하지 마세요/);
   assert.match(prompt, /외부 검색/);
   assert.match(prompt, /실제 사전 조사가 존재하지 않는다는 사실/);
   assert.match(prompt, /참가자의 초기 순위: 1위 손전등/);

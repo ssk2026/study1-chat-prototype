@@ -1,6 +1,6 @@
 import { errorResponse, HttpError, json, readJson, requireString, requireTaskCode } from "../lib/http.js";
 import { findSession, supabaseRequest } from "../lib/supabase.js";
-import { isCompleteRanking } from "../lib/rankings.js";
+import { DESERT_ITEMS, isCompleteRanking } from "../lib/rankings.js";
 
 const MINIMUM_DISCUSSION_TURNS = 10;
 
@@ -24,6 +24,11 @@ export async function POST(request) {
     if (taskCode === "TASK_1_DESERT") {
       for (const key of ["initialRanking", "aiRanking", "consensusRanking", "finalRanking"]) {
         if (body[key] != null && !validRanking(body[key])) throw new HttpError(400, `${key} 형식이 올바르지 않습니다.`);
+      }
+      if (body.initialRanking != null) {
+        const rationales = body.initialRationales && typeof body.initialRationales === "object" && !Array.isArray(body.initialRationales) ? body.initialRationales : {};
+        const missingRationale = DESERT_ITEMS.find((item) => !String(rationales[item] ?? "").trim());
+        if (missingRationale) throw new HttpError(400, `${missingRationale}의 예측 근거를 작성해 주세요.`);
       }
       if (body.complete) {
         const userMessages = await supabaseRequest(`messages?session_id=eq.${encodeURIComponent(sessionId)}&role=eq.user&select=id&limit=${MINIMUM_DISCUSSION_TURNS}`);

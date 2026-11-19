@@ -58,6 +58,12 @@ export async function POST(request) {
       const choices = new Set(["man", "woman", "equal"]);
       if (body.initialChoice && !choices.has(body.initialChoice)) throw new HttpError(400, "초기 선택값이 올바르지 않습니다.");
       if (body.finalChoice && !choices.has(body.finalChoice)) throw new HttpError(400, "최종 선택값이 올바르지 않습니다.");
+      if (body.complete) {
+        const userMessages = await supabaseRequest(`messages?session_id=eq.${encodeURIComponent(sessionId)}&role=eq.user&select=id&limit=${MINIMUM_DISCUSSION_TURNS}`);
+        if ((userMessages?.length ?? 0) < MINIMUM_DISCUSSION_TURNS) {
+          throw new HttpError(409, `AI와 최소 ${MINIMUM_DISCUSSION_TURNS}턴 대화한 뒤 제출해 주세요.`);
+        }
+      }
       await supabaseRequest("task2_opinions?on_conflict=session_id", {
         method: "POST",
         prefer: "resolution=merge-duplicates,return=minimal",
